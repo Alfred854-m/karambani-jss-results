@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karambani Primary - JSS No Streams V2.3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#fefce8}
+header{background:#a16207;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.card{background:#fff;border-radius:12px;padding:16px;margin:10px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.top{display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:10px;margin:10px}
+.main{display:grid;grid-template-columns:380px 1fr;gap:10px;margin:10px}
+@media(max-width:900px){.main{grid-template-columns:1fr}.top{grid-template-columns:1fr 1fr}}
+input,select{width:100%;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+button{width:100%;padding:12px;background:#a16207;color:#fff;border:0;border-radius:8px;font-weight:700;cursor:pointer}
+.btn-sm{width:auto;padding:6px 10px;font-size:11px}.btn-red{background:#dc2626}.btn-blue{background:#2563eb}.btn-gold{background:#ca8a04;color:#111}.btn-purple{background:#7c3aed}.btn-green{background:#059669}
+table{width:100%;border-collapse:collapse;font-size:12px}th{background:#a16207;color:#fff;padding:8px;text-align:left}td{padding:7px;border-bottom:1px solid #e2e8f0}
+#loginScreen{position:fixed;inset:0;background:#a16207;display:flex;align-items:center;justify-content:center;z-index:9999}
+.loginBox{background:#fff;padding:26px;border-radius:14px;width:90%;max-width:400px}
+.logo-preview{width:60px;height:60px;border:2px dashed #a16207;border-radius:8px;object-fit:contain;display:block;margin:6px auto;background:#fefce8}
+@media print{header,.no-print{display:none!important}.print-card{page-break-after:always}}
+</style>
+</head>
+<body>
+<div id="loginScreen"><div class="loginBox">
+<h2 style="text-align:center;color:#a16207"> KARAMBANI PRIMARY<br><small>JSS - No Streams V2.3</small><br><small style="font-size:11px;color:#64748b">With Downloads & Backup</small></h2>
+<div style="margin-top:14px">
+<input id="user" placeholder="Username" value="teacher">
+<input id="pass" type="password" placeholder="Password" value="1234">
+<button onclick="login()">Login</button>
+</div></div></div>
+
+<header><h1> Karambani Primary | JSS Results V2.3</h1><div style="display:flex;flex-wrap:wrap;gap:4px">
+<button class="btn-sm btn-blue" onclick="printCombined()">🖨️ Combined</button>
+<button class="btn-sm btn-green" onclick="downloadCSV()">📥 CSV</button>
+<button class="btn-sm btn-gold" onclick="downloadExcel()">📊 Excel</button>
+<button class="btn-sm btn-purple" onclick="downloadBackup()">💾 Backup</button>
+<button class="btn-sm btn-red" onclick="logout()">Logout</button>
+</div></header>
+
+<div class="top no-print">
+<div class="card"><b id="count" style="font-size:22px">0</b><div>Learners</div><span style="font-size:10px" id="currentExamLabel">End Term</span></div>
+<div class="card"><b id="meanAvg" style="font-size:22px">0</b><div>Class Mean</div><div style="font-size:10px;color:#059669" id="storageInfo">Saved locally</div></div>
+<div class="card" style="border:2px solid #a16207;background:#fefce8">
+<b style="font-size:11px">🏫 SCHOOL SETTINGS</b>
+<img id="logoPreview" class="logo-preview" src="" alt="No Logo">
+<input type="file" id="logoInput" accept="image/*" style="font-size:11px">
+<input id="schoolNameInput" value="KARAMBANI PRIMARY SCHOOL" style="font-size:11px;padding:6px">
+<input id="poBoxInput" value="P.O. Box - Marimanti, Tharaka" style="font-size:11px;padding:6px">
+<label style="font-size:10px;font-weight:bold;margin-top:6px;display:block">📝 EXAM TYPE:</label>
+<select id="examTypeSelect" style="font-size:12px;padding:8px;background:#fffbeb;border:2px solid #f59e0b;font-weight:bold">
+  <option>Opener Exams</option><option>Mid Term Exams</option><option selected>End Term Exams</option><option>Beginning Term</option><option>Mock Exams</option>
+</select>
+<label style="font-size:10px;font-weight:bold;margin-top:4px;display:block">📅 TERM:</label>
+<select id="termSelect" style="font-size:12px;padding:8px"><option>Term 1</option><option>Term 2</option><option selected>Term 3</option></select>
+<label style="font-size:10px;font-weight:bold;margin-top:4px;display:block">📅 YEAR:</label>
+<input id="yearInput" type="number" value="2026" style="font-size:12px;padding:6px">
+<button style="padding:8px;font-size:12px;margin-top:6px;background:#f59e0b;color:#111" onclick="saveSettings()">💾 Save Settings</button>
+<div style="margin-top:10px;border-top:1px dashed #fde68a;padding-top:8px">
+<label style="font-size:10px;font-weight:bold">♻️ RESTORE BACKUP:</label>
+<input type="file" id="restoreInput" accept=".json" onchange="restoreBackup(event)" style="font-size:10px">
+<div style="font-size:9px;color:#64748b;margin-top:2px">Restore if data lost</div>
+</div>
+</div>
+<div class="card"><b style="font-size:11px">CBC Key</b><div style="font-size:10px">EE 80-100<br>ME 60-79<br>AE 40-59<br>BE Below 40</div><div style="margin-top:8px;font-size:10px;background:#fef3c7;padding:6px;border-radius:4px"><span id="displayExamType">End Term Exams - Term 3 2026</span><br><br><b>Downloads:</b><br>📥 CSV = Sheets<br>📊 Excel = Excel<br>💾 Backup = Full Save</div></div>
+</div>
+
+<div class="main"><div class="no-print">
+<div class="card"><div style="display:flex;justify-content:space-between"><h3>Add Learner</h3><button class="btn-sm btn-red" onclick="clearAll()">Clear All</button></div>
+<input id="admNo" placeholder="Adm No e.g KARA/001"><input id="studName" placeholder="Learner Full Name">
+<select id="gradeClass"><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option></select>
+<button onclick="addStudent()">Add Learner</button></div>
+
+<div class="card"><h3>Enter Marks (0-100)</h3><select id="studentList"><option value="">-- Select Learner --</option></select>
+<input id="eng" type="number" placeholder="1. English"><input id="kis" type="number" placeholder="2. Kiswahili"><input id="mat" type="number" placeholder="3. Mathematics"><input id="intSci" type="number" placeholder="4. Integrated Science"><input id="sst" type="number" placeholder="5. Social Studies"><input id="agri" type="number" placeholder="6. Agriculture & Nutrition"><input id="preTech" type="number" placeholder="7. Pre-Technical Studies"><input id="cre" type="number" placeholder="8. CRE / IRE"><input id="creative" type="number" placeholder="9. Creative Arts & Sports">
+<button style="background:#f59e0b;color:#111" onclick="saveMarks()">💾 Save Marks</button>
+</div></div>
+
+<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px" class="no-print"><h3>Results - <span id="tableExamType">End Term Exams</span> | <select id="filterGrade" onchange="draw()" style="width:auto;display:inline;padding:4px"><option value="all">All Grades</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option></select></h3><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn-sm btn-blue" onclick="printCombined()">Print</button><button class="btn-sm btn-green" onclick="downloadCSV()">CSV</button><button class="btn-sm btn-gold" onclick="downloadExcel()">Excel</button><button class="btn-sm btn-purple" onclick="downloadBackup()">Backup</button></div></div>
+<div style="overflow:auto" class="no-print"><table><thead><tr><th>#</th><th>Adm</th><th>Name</th><th>Grade</th><th>Total</th><th>Mean</th><th>Level</th><th>Action</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+<div id="noData" style="text-align:center;padding:15px;color:#64748b" class="no-print">No learners yet - Add to start saving</div>
+<div id="printArea"></div>
+</div></div>
+
+<script>
+let allStudents=JSON.parse(localStorage.getItem('karambani_jss_v1')||'[]');
+let schoolLogo=localStorage.getItem('karambani_logo')||'';
+let schoolName=localStorage.getItem('karambani_schName')||'KARAMBANI PRIMARY SCHOOL';
+let poBox=localStorage.getItem('karambani_poBox')||'P.O. Box - Marimanti, Tharaka';
+let examType=localStorage.getItem('karambani_examType')||'End Term Exams';
+let term=localStorage.getItem('karambani_term')||'Term 3';
+let year=localStorage.getItem('karambani_year')||'2026';
+
+document.getElementById('schoolNameInput').value=schoolName;
+document.getElementById('poBoxInput').value=poBox;
+document.getElementById('examTypeSelect').value=examType;
+document.getElementById('termSelect').value=term;
+document.getElementById('yearInput').value=year;
+if(schoolLogo) document.getElementById('logoPreview').src=schoolLogo;
+updateDisplay();
+
+document.getElementById('logoInput').addEventListener('change', function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){ schoolLogo=ev.target.result; document.getElementById('logoPreview').src=schoolLogo; }
+  reader.readAsDataURL(file);
+});
+function updateDisplay(){
+  document.getElementById('displayExamType').innerText=examType+' - '+term+' '+year;
+  document.getElementById('currentExamLabel').innerText=examType;
+  document.getElementById('tableExamType').innerText=examType;
+  document.getElementById('storageInfo').innerText=allStudents.length+' saved • Auto-saved';
+}
+function saveSettings(){
+  schoolName=document.getElementById('schoolNameInput').value||'KARAMBANI PRIMARY SCHOOL';
+  poBox=document.getElementById('poBoxInput').value||'';
+  examType=document.getElementById('examTypeSelect').value;
+  term=document.getElementById('termSelect').value;
+  year=document.getElementById('yearInput').value;
+  localStorage.setItem('karambani_logo',schoolLogo);
+  localStorage.setItem('karambani_schName',schoolName);
+  localStorage.setItem('karambani_poBox',poBox);
+  localStorage.setItem('karambani_examType',examType);
+  localStorage.setItem('karambani_term',term);
+  localStorage.setItem('karambani_year',year);
+  updateDisplay();
+  alert('✅ Saved! '+examType+' - '+term+' '+year);
+}
+function save(){localStorage.setItem('karambani_jss_v1',JSON.stringify(allStudents));draw()}
+function getCBC(avg){if(avg>=80) return 'EE'; if(avg>=60) return 'ME'; if(avg>=40) return 'AE'; return 'BE';}
+function getCBCFull(avg){if(avg>=80) return 'EE - Exceeding'; if(avg>=60) return 'ME - Meeting'; if(avg>=40) return 'AE - Approaching'; return 'BE - Below';}
+function addStudent(){
+  const adm=admNo.value.trim(); const name=studName.value.trim(); const g=gradeClass.value;
+  if(!adm||!name){alert('Enter Adm and Name');return}
+  if(allStudents.find(s=>s.adm===adm)){alert('Adm exists');return}
+  allStudents.push({adm,name:name.toUpperCase(),grade:g,eng:0,kis:0,mat:0,intSci:0,sst:0,agri:0,preTech:0,cre:0,creative:0,total:0,mean:0,cbc:'-'});
+  admNo.value='';studName.value='';save();
+}
+function saveMarks(){
+  const adm=studentList.value; if(!adm){alert('Select learner');return}
+  const s=allStudents.find(x=>x.adm===adm);
+  const vals=[eng,kis,mat,intSci,sst,agri,preTech,cre,creative].map(i=>parseInt(i.value)||0);
+  if(vals.some(v=>v>100)){alert('Max 100');return}
+  [s.eng,s.kis,s.mat,s.intSci,s.sst,s.agri,s.preTech,s.cre,s.creative]=vals;
+  s.total=vals.reduce((a,b)=>a+b,0); s.mean=Math.round(s.total/9); s.cbc=getCBCFull(s.mean);
+  save(); alert(s.name+' Saved! '+s.total+'/900');
+  [eng,kis,mat,intSci,sst,agri,preTech,cre,creative].forEach(i=>i.value='');
+}
+function deleteStudent(adm){if(!confirm('Delete '+adm+'?'))return; allStudents=allStudents.filter(s=>s.adm!==adm); save()}
+function clearAll(){if(!allStudents.length)return alert('No data'); if(!confirm('DELETE ALL LEARNERS?'))return; allStudents=[];localStorage.removeItem('karambani_jss_v1');draw()}
+function draw(){
+  const filter=document.getElementById('filterGrade').value;
+  let filtered=filter==='all'?allStudents:allStudents.filter(s=>s.grade===filter);
+  let sorted=[...filtered].sort((a,b)=>b.total-a.total); let sum=0;
+  tableBody.innerHTML='';
+  sorted.forEach((s,i)=>{sum+=s.mean||0;
+    tableBody.innerHTML+=`<tr><td>${i+1}</td><td>${s.adm}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.total}</td><td>${s.mean}</td><td><b>${s.cbc}</b></td><td><button class="btn-sm" onclick="printOne('${s.adm}')">Print</button> <button class="btn-sm btn-red" onclick="deleteStudent('${s.adm}')">Del</button></td></tr>`;
+  });
+  count.innerText=filtered.length; meanAvg.innerText=filtered.length?Math.round(sum/filtered.length):0;
+  studentList.innerHTML='<option value="">-- Select Learner --</option>'+allStudents.map(s=>`<option value="${s.adm}">${s.adm} - ${s.name}</option>`).join('');
+  noData.style.display=filtered.length?'none':'block';
+  updateDisplay();
+}
+function logoHtml(size=70){ return schoolLogo?`<img src="${schoolLogo}" style="width:${size}px;height:${size}px;object-fit:contain">`:`<div style="width:${size}px;height:${size}px;background:#a16207;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:${size/2}px">K</div>`; }
+function printOne(adm){
+  const s=allStudents.find(x=>x.adm===adm);
+  const html=`<div class="print-card card" style="border:2px solid #a16207">
+    <div style="display:flex;align-items:center;gap:15px;border-bottom:2px solid #a16207;padding-bottom:10px;margin-bottom:10px">
+      <div>${logoHtml(80)}</div>
+      <div style="text-align:center;flex:1"><h2 style="color:#a16207">${schoolName}</h2><p>${poBox}</p><h3 style="margin-top:6px;background:#a16207;color:#fff;display:inline-block;padding:4px 14px;border-radius:6px">${s.grade} - ${examType} - ${term} ${year}</h3></div>
+      <div>${logoHtml(80)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:10px">
+      <div><b>Learner:</b> ${s.name}</div><div><b>Adm No:</b> ${s.adm}</div>
+      <div><b>Total:</b> ${s.total}/900</div><div><b>Mean:</b> ${s.mean} - ${s.cbc}</div>
+    </div>
+    <table><thead><tr><th>#</th><th>Learning Area</th><th>Score</th><th>Level</th></tr></thead><tbody>
+      <tr><td>1</td><td>English</td><td>${s.eng}</td><td>${getCBC(s.eng)}</td></tr>
+      <tr><td>2</td><td>Kiswahili</td><td>${s.kis}</td><td>${getCBC(s.kis)}</td></tr>
+      <tr><td>3</td><td>Mathematics</td><td>${s.mat}</td><td>${getCBC(s.mat)}</td></tr>
+      <tr><td>4</td><td>Integrated Science</td><td>${s.intSci}</td><td>${getCBC(s.intSci)}</td></tr>
+      <tr><td>5</td><td>Social Studies</td><td>${s.sst}</td><td>${getCBC(s.sst)}</td></tr>
+      <tr><td>6</td><td>Agriculture</td><td>${s.agri}</td><td>${getCBC(s.agri)}</td></tr>
+      <tr><td>7</td><td>Pre-Technical</td><td>${s.preTech}</td><td>${getCBC(s.preTech)}</td></tr>
+      <tr><td>8</td><td>CRE</td><td>${s.cre}</td><td>${getCBC(s.cre)}</td></tr>
+      <tr><td>9</td><td>Creative Arts</td><td>${s.creative}</td><td>${getCBC(s.creative)}</td></tr>
+    </tbody></table>
+    <div style="margin-top:25px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;font-size:11px;text-align:center">
+      <div><div style="border-top:1px solid #000;margin-top:40px">Class Teacher</div></div>
+      <div><div style="border-top:1px solid #000;margin-top:40px">Head Teacher</div></div>
+      <div><div style="border-top:1px solid #000;margin-top:40px">Parent</div></div>
+    </div>
+  </div>`;
+  document.getElementById('printArea').innerHTML=html; window.print();
+}
+function printCombined(){
+  const filter=document.getElementById('filterGrade').value;
+  let filtered=filter==='all'?allStudents:allStudents.filter(s=>s.grade===filter);
+  if(!filtered.length)return alert('No learners');
+  filtered=[...filtered].sort((a,b)=>b.total-a.total);
+  let html=`<div class="print-card card"><div style="display:flex;align-items:center;gap:15px;margin-bottom:12px">
+    <div>${logoHtml(60)}</div><div style="text-align:center;flex:1"><h2>${schoolName}</h2><p>${poBox}</p><p><b>${filter==='all'?'All Grades':filter} - ${examType} - ${term} ${year} - COMBINED - ${filtered.length} Learners</b></p></div><div>${logoHtml(60)}</div></div>
+  <table><thead><tr><th>#</th><th>Adm</th><th>Name</th><th>Grade</th><th>Eng</th><th>Kis</th><th>Mat</th><th>Sci</th><th>SST</th><th>Agri</th><th>PreT</th><th>CRE</th><th>Arts</th><th>Total</th><th>Mean</th><th>Level</th></tr></thead><tbody>`;
+  filtered.forEach((s,i)=>{ html+=`<tr><td>${i+1}</td><td>${s.adm}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.eng}</td><td>${s.kis}</td><td>${s.mat}</td><td>${s.intSci}</td><td>${s.sst}</td><td>${s.agri}</td><td>${s.preTech}</td><td>${s.cre}</td><td>${s.creative}</td><td><b>${s.total}</b></td><td>${s.mean}</td><td>${s.cbc}</td></tr>`; });
+  html+=`</tbody></table><p style="font-size:10px;margin-top:8px">Printed: ${new Date().toLocaleString()} | ${schoolName} - ${examType}</p></div>`;
+  document.getElementById('printArea').innerHTML=html; window.print();
+}
+
+function getFilteredData(){
+  const f=document.getElementById('filterGrade').value;
+  if(f==='all') return allStudents;
+  return allStudents.filter(s=>s.grade===f);
+}
+function downloadCSV(){
+  let data=getFilteredData();
+  if(!data.length) return alert('No learners to download');
+  data=[...data].sort((a,b)=>b.total-a.total);
+  let csv='No,Adm No,Name,Grade,English,Kiswahili,Mathematics,Integrated Science,Social Studies,Agriculture,PreTechnical,CRE,Creative Arts,Total,Mean,CBC Level,Exam Type,Term,Year,School\n';
+  data.forEach((s,i)=>{
+    csv+=`${i+1},${s.adm},"${s.name}",${s.grade},${s.eng},${s.kis},${s.mat},${s.intSci},${s.sst},${s.agri},${s.preTech},${s.cre},${s.creative},${s.total},${s.mean},"${s.cbc}",${examType},${term},${year},"${schoolName}"\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`KARAMBANI_${document.getElementById('filterGrade').value}_${examType.replace(/\s+/g,'_')}_${term}_${year}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function downloadExcel(){
+  let data=getFilteredData();
+  if(!data.length) return alert('No learners');
+  data=[...data].sort((a,b)=>b.total-a.total);
+  let table='<html><head><meta charset="utf-8"></head><body>';
+  table+='<table border="1"><tr><th colspan="16" style="background:#a16207;color:white;font-size:16px">'+schoolName+' - '+document.getElementById('filterGrade').value+' - '+examType+' - '+term+' '+year+' - '+data.length+' Learners</th></tr>';
+  table+='<tr><th>#</th><th>Adm</th><th>Name</th><th>Grade</th><th>Eng</th><th>Kis</th><th>Mat</th><th>IntSci</th><th>SST</th><th>Agri</th><th>PreT</th><th>CRE</th><th>Arts</th><th>Total /900</th><th>Mean</th><th>Level</th></tr>';
+  data.forEach((s,i)=>{
+    table+=`<tr><td>${i+1}</td><td>${s.adm}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.eng}</td><td>${s.kis}</td><td>${s.mat}</td><td>${s.intSci}</td><td>${s.sst}</td><td>${s.agri}</td><td>${s.preTech}</td><td>${s.cre}</td><td>${s.creative}</td><td><b>${s.total}</b></td><td>${s.mean}</td><td>${s.cbc}</td></tr>`;
+  });
+  table+='</table></body></html>';
+  const blob=new Blob([table],{type:'application/vnd.ms-excel'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`KARAMBANI_${document.getElementById('filterGrade').value}_${examType}.xls`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function downloadBackup(){
+  const backup={
+    schoolName,poBox,examType,term,year,schoolLogo,
+    allStudents,
+    version:'KARAMBANI JSS V2.3',
+    date:new Date().toISOString(),
+    totalLearners:allStudents.length
+  };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`BACKUP_KARAMBANI_${year}_${term.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  alert('✅ FULL BACKUP DOWNLOADED!\n\n'+allStudents.length+' learners saved.\nKeep this file safe.');
+}
+function restoreBackup(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.allStudents) return alert('Invalid backup file!');
+      if(confirm('⚠️ RESTORE BACKUP?\n\nFound: '+data.allStudents.length+' learners\nDate: '+data.date+'\n\nREPLACE current data?')){
+        allStudents=data.allStudents;
+        schoolLogo=data.schoolLogo||''; schoolName=data.schoolName||schoolName; poBox=data.poBox||poBox;
+        examType=data.examType||examType; term=data.term||term; year=data.year||year;
+        localStorage.setItem('karambani_jss_v1',JSON.stringify(allStudents));
+        localStorage.setItem('karambani_logo',schoolLogo);
+        localStorage.setItem('karambani_schName',schoolName);
+        localStorage.setItem('karambani_poBox',poBox);
+        localStorage.setItem('karambani_examType',examType);
+        localStorage.setItem('karambani_term',term);
+        localStorage.setItem('karambani_year',year);
+        if(schoolLogo) logoPreview.src=schoolLogo;
+        schoolNameInput.value=schoolName; poBoxInput.value=poBox; examTypeSelect.value=examType; termSelect.value=term; yearInput.value=year;
+        save();
+        alert('✅ RESTORED! '+allStudents.length+' learners!');
+      }
+    }catch(err){alert('❌ Invalid backup - '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+function login(){if(user.value==='teacher'&&pass.value==='1234'){localStorage.setItem('karambani_jss_login','yes');loginScreen.style.display='none'}else alert('teacher / 1234')}
+function logout(){localStorage.removeItem('karambani_jss_login');location.reload()}
+if(localStorage.getItem('karambani_jss_login')==='yes')loginScreen.style.display='none';
+draw();
+</script>
+</body>
+</html>
